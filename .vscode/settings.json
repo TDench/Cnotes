@@ -1,0 +1,6 @@
+{
+    "[markdown]": {
+        "editor.formatOnSave": true,
+    },
+    "pasteImage.path": "${currentFileDir}\\img_${currentFileNameWithoutExt}"
+}
