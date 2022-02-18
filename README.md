@@ -7,9 +7,13 @@
 
 ## C 的基礎篇
 
-知名螞蟻本的內容，
+知名螞蟻本的內容
 
 - [Preprocessor](preprocessor.md)
+
+## C9X rationale
+
+- [宣告系列](declarations.md)
 
 ## 了解 C 的 pointer
 
