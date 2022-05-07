@@ -1,5 +1,11 @@
 # ISO 9899:201x 翻譯
 
+這邊寫下我的翻譯，關於
+
+> 會依照我自己的理解加入一些敘述，整體而言不是為了要非常正確的翻譯整份文件，是為了要讓人可以導讀這份文件這樣
+
+基本上，只有想要做compiler 的人應該要詳閱整份文件。若是要做C語言開發的人，有不清楚的地方在查閱C99或C11 的規格文件書就好。
+
 ## Introduction
 
 - 有些功能已經逐步廢棄了，沒有被刪掉是因為這個功能被廣泛的使用。請不要拿這些功能來寫程式。[6.11] [7.31]
@@ -33,7 +39,7 @@
 - output 如何被 C 語言處理
 - 實作上會遇到什麼限制(restrictions)
 
-這份文件已下無關
+這份文件以下無關
 
 - 資料處理系統(data-processing system)中，C語言被transformed的機制
 - 資料處理系統(data-processing system)中，C語言被invoked的機制
@@ -108,7 +114,8 @@ int func(int a, int b, int c)
 external appearance or action
 ```
 
-可以分成
+可以分成四種，分別是實作相關、區域相關、未定義行為、未指定行為。
+了解這一段可以知道有時候寫的一些光怪陸離的C語言是不一定具有跨平台的性質的。
 
 - **implementation-defined behavior [3.4.1]**
   - unspecified behavior where each implementation documents how the choice is made
@@ -159,10 +166,10 @@ used for the organization, control, or representation of data
 根據大小，有分成
 
 - character [3.7.1]
-  - single-byte character <C> bit representation that fits in a byte
+  - `single-byte character <C> bit representation that fits in a byte`
   - 剛好是一個 byte 的大小
 - multibyte character [3.7.2]
-  - sequence of one or more bytes representing a member of the extended character set of either the source or the execution environment
+  - `sequence of one or more bytes representing a member of the extended character set of either the source or the execution environment`
   - 連續的一個或多個bytes 的大小
   - basic character set 被包含於 extended character set
 - wide character [3.7.3]
@@ -224,107 +231,145 @@ restriction imposed upon programs by the implementation
 
 ### memory location[3.14]
 
-有兩種可能
-1 memory location
+有兩種可能，要嘛是
+
+1. scalar type 的物件，或是
+1. 最大連續的 bit-fields ，而且這些數值有非零的大小
+
+```iso
 either an object of scalar type, or a maximal sequence of adjacent bit-fields all having nonzero width
-2 NOTE 1 Two threads of execution can update and access separate memory locations without interfering with each other.
+```
 
-3 NOTE 2 A bit-field and an adjacent non-bit-field member are in separate memory locations. The same applies to two bit-fields, if one is declared inside a nested structure declaration and the other is not, or if the two are separated by a zero-length bit-field declaration, or if they are separated by a non-bit-field member declaration. It is not safe to concurrently update two non-atomic bit-fields in the same structure if all members declared between them are also (non-zero-length) bit-fields, no matter what the sizes of those intervening bit-fields happen to be.
+筆記:
 
-4 EXAMPLE A structure declared as
+1. 兩個執行中的threads，可以更新跟存取不同的記憶體位置，而且不會互相干擾對方
 
-          struct {
-                char a;
-                int b:5, c:11, :0, d:8;
-                struct { int ee:8; } e;
-          }
-contains four separate memory locations: The member a, and bit-fields d and e.ee are each separate memory locations, and can be modified concurrently without interfering with each other. The bit-fields b and c together constitute the fourth memory location. The bit-fields b and c cannot be concurrently modified, but b and a, for example, can be.
-Contents
+- 兩個 bit field 算是在兩個分開的記憶體位置，當
+  - 一個在巢狀的structure中，一個沒有
+  - 兩個 bit field 被一個長度為零的 bit field 分開
+  - 兩個 bit field 被一個長度非零的 bit-field member 分開
 
-3.15
-1 object
+1. 更新在同一個 structure 裡的 non-atomic 的 bit fields 是非常不安全的。在什麼情況下，在所有的 member
+
+It is not safe to concurrently update two non-atomic bit-fields in the same structure if all members declared between them are also (non-zero-length) bit-fields, no matter what the sizes of those intervening bit-fields happen to be.
+
+> 範例
+
+```c
+struct {
+      char a;
+      int b:5, c:11, :0, d:8;
+      struct { int ee:8; } e;
+}
+```
+
+在上述這個範例中，有四個分開的 memory locations
+
+- member a
+- bit-fields d
+- e.ee
+- bit-fields b and c together
+
+重要的是： b 跟 c 是不能同時被修改的，但是 b 跟 a 可以
+
+### object [3.15]
+
+在執行時間，儲存資料的區域，儲存的資料可以呈現數值
+
+```iso
 region of data storage in the execution environment, the contents of which can represent values
+```
 
-2 NOTE When referenced, an object may be interpreted as having a particular type; see 6.3.2.1.
+筆記，物件被 referenced 的時候，他會有一些特別的性質，可以看 6.3.2.1. lvalue 之類的 [QM] 先看這個
 
-Contents
+### parameter[3.16]
 
-3.16
-1 parameter
 formal parameter formal argument (deprecated) object declared as part of a function declaration or definition that acquires a value on entry to the function, or an identifier from the comma-separated list bounded by the parentheses immediately following the macro name in a function-like macro definition
 
-Contents
+### recommended practice[3.17]
 
-3.17
-1 recommended practice
-specification that is strongly recommended as being in keeping with the intent of the standard, but that may be impractical for some implementations
+這份文件強烈建議這樣做，但是有時候可能實作上有困難。
 
-Contents
+### runtime-constraint[3.18]
 
-3.18
-1 runtime-constraint
-requirement on a program when calling a library function
+當呼叫 library function 的時候會有一些需要符合的要求
 
-2 NOTE 1 Despite the similar terms, a runtime-constraint is not a kind of constraint as defined by 3.8, and need not be diagnosed at translation time.
+- 這個跟 3.8 說的 constraint 不一樣，不一定需要在 translation time 就被診斷出來
+- 支援 annex K 的擴充功能的實作，被要求可以辨識出 runtime constraints ，恩，可以看 K.3.1.4.
 
-3 NOTE 2 Implementations that support the extensions in annex K are required to verify that the runtime- constraints for a library function are not violated by the program; see K.3.1.4.
-Contents
+### value
 
-3.19
-1 value
+物件的精準意義，當有特別的 type的時候
+
+```iso
 precise meaning of the contents of an object when interpreted as having a specific type
+```
 
-Contents
+關於 value 有一些其他的東西
 
-3.19.1
-1 implementation-defined value
-unspecified value where each implementation documents how the choice is made
+- implementation-defined value [3.19.1]
+  `unspecified value where each implementation documents how the choice is made`
+  看你的實作決定的數值
+- indeterminate value [3.19.2]
+  `either an unspecified value or a trap representation`
+  指兩個東西，分別是
+  - unspecified value [3.19.3]
+    `valid value of the relevant type where this International Standard imposes no requirements on which value is chosen in any instance`
+    ISO 文件沒有要求一定要給予什麼value 的那種，看案例決定要回傳什麼數值。
+    是 unspecified value 就不會是 trap representation 這兩個名詞是互斥的定義
 
-Contents
-
-3.19.2
-1 indeterminate value
-either an unspecified value or a trap representation
-
-Contents
-
-3.19.3
-1 unspecified value
-valid value of the relevant type where this International Standard imposes no requirements on which value is chosen in any instance
-
-2 NOTE An unspecified value cannot be a trap representation.
-
-Contents
-
-3.19.4
-1 trap representation
-an object representation that need not represent a value of the object type
-
-Contents
-
-3.19.5
-1 perform a trap
-interrupt execution of the program such that no further operations are performed
-
-2 NOTE In this International Standard, when the word ''trap'' is not immediately followed by ''representation'', this is the intended usage.2)
+  - trap representation[3.19.4]
+    `an object representation that need not represent a value of the object type`
+    一個物件的表示方式，不一定要表現那個物件的 type
+    - perform a trap[3.19.5]
+      `interrupt execution of the program such that no further operations are performed`
+      程式中斷，沒有執行更多的操作
 
 Footnotes
 
-2) For example, ''Trapping or stopping (if supported) is disabled...'' (F.8.2). Note that fetching a trap representation might perform a trap but is not required to (see 6.2.6.1).
+For example, ''Trapping or stopping (if supported) is disabled...'' (F.8.2). Note that fetching a trap representation might perform a trap but is not required to (see 6.2.6.1).
 
-Contents
+### 笑臉表示法 ^ V ^ [3.20]
 
-3.20
-1 [^ x ^]
-ceiling of x: the least integer greater than or equal to x
+這個用根號包圍一個x`[^ x ^]`，這樣代表最小大於x的整數
 
-2 EXAMPLE [^2.4^] is 3, [^-2.4^] is -2.
+`ceiling of x: the least integer greater than or equal to x`
 
-Contents
+例如
 
-3.21
-1 [_ x _]
-floor of x: the greatest integer less than or equal to x
+- [^2.4^] 是 3
+- [^-2.4^] is -2.
 
-2 EXAMPLE [_2.4_] is 2, [_-2.4_] is -3.
-Contents
+### 底線表示法 [_ x _]  [3.21]
+
+這個用底線包圍一個x， `[_ x _]` ，代表最大小於x的整數
+
+例如
+
+- [_2.4_] is 2
+- [_-2.4_] is -3.
+
+## 一致性 Conformance
+
+- 文件中， shall 代表這是一個實作的要求，必須達成的 shall not 代表說這個是禁止事項
+- 當有定義 shall 或是 shall not 的打破了 constraint (普通的或是 runtime的)，那就會產生 undefined 的行為。
+- undefined behavior 跟 by the omission of any explicit definition of behavior 是一樣的意思，都是behavior that is undefined
+- 當成是正確的時候，操作在正確的資料上，包含unspecifed hebavior 都應該被正確的執行(5.1.2.3.)
+- 當遇到 #error 有中的時候，preprocessing 就應該要停下來。除非 #error 被 #ifdef 之類的跳掉
+- 請嚴格的確保程式只用了這個ISO或是指定標準 Library的功能。不要寫一個程式，結果是依靠unspecified, undefined, or implementation-defined behavior，請至少符合最低限度的實作限制
+- 確認你的實作有兩個方法hosted 或 freestanding
+  - conforming hosted implementation
+    這個會接受所有嚴格的定義，
+  - conforming freestanding implementation
+    這個會接受，你有用的 library clause  的限制，如<float.h>, <iso646.h>, <limits.h>, <stdalign.h>, <stdarg.h>, <stdbool.h>, <stddef.h>, <stdint.h>, and <stdnoreturn.h>
+- implementation 應該要有文件闡述所有implementation- defined 或locale-specific  的特色
+
+一個  strictly conforming program 可以用#ifdef的方式去確保你會用到享用的東西。例如
+
+```c
+#ifdef __STDC_IEC_559__ /* FE_UPWARD defined */
+  /* ... */
+  fesetround(FE_UPWARD);
+  /* ... */
+#endif
+```
