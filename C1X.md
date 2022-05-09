@@ -373,3 +373,101 @@ For example, ''Trapping or stopping (if supported) is disabled...'' (F.8.2). Not
   /* ... */
 #endif
 ```
+
+## 語言 (Chapter 6)
+
+看起來是最長的一章，這邊講解 C 語言的各種東西 [QM] 回來補充
+
+- Notation
+- Concepts
+- Conversions
+- Lexical elements
+- Expressions
+- Constant expressions
+- Declarations
+- Statements and blocks
+- External definitions
+- Preprocessing directives
+- Future language directions
+
+### 符號定義 (Notation) [6.1]
+
+在第六章 (this clause)
+
+- 句法相關的 syntactic categories (nonterminals) 會是斜體字
+- : 代表 nonterminal
+1 In the syntax notation used in this clause, syntactic categories (nonterminals) are indicated by italic type, and literal words and character set members (terminals) by bold type. A colon (:) following a nonterminal introduces its definition. Alternative definitions are listed on separate lines, except when prefaced by the words ''one of''. An optional symbol is indicated by the subscript ''opt'', so that
+所以下面這個代表，中括弧裡面有一個表示是選擇性的可以表示。
+
+${expression_{opt}}$
+
+indicates an optional expression enclosed in braces.
+
+2 When syntactic categories are referred to in the main text, they are not italicized and words are separated by spaces instead of hyphens.
+
+關於符號的說明會放在 annex A.
+
+### 概念 [6.2]
+
+#### identifiers 的作用域 [6.2.1]
+
+- identifiers 可以代表物件、函式、tag、structure的成員、union、enumeration。
+- identifiers 就是typedef name、label name、macro name、macro parameter
+- 相同的 identifiers 可以在程式中不同的地方，代表不同的實體(entities)
+
+- enumeration 的成員(member) 叫做 enumeration constant
+
+- Macro names and macro parameters 沒有在這邊被更進一步的討論，因為在 program translation 中的  semantic phase之前， 在原始碼中的 macro name 都會被 preprocessing token sequences 取代
+
+- identifier 只有在特定的區域才能代表某個實體(entity)，這個特定的區域叫做作用域(scope)。
+- 如果同樣一個 identifier 可以代表同一個實體(entity)的話，他們只有兩種可能
+  - 他們在不同的作用域(Scope)
+  - 他們在不同的命名空間(name spaces)
+- 有四種 scopes:
+  - function scopes
+  - file scopes
+  - block scopes
+  - funciton prototype scopes
+
+funciton prototype: 就是宣告function 的 parameters 。
+
+- function scopes
+  - 只有 label name 是 function scope。
+  - 例如 goto 可以寫在 function 內的任意一個地方。也就是說這個 goto 是不能跨 function 的。
+  - 被 implicitly 定義，也就語法(syntactic)出現的時候，也就是 一個冒號配上一個 statement 舉例說明:`even:`
+  
+```c
+void checkEvenOrNot(int num){
+  if (num % 2 == 0)
+      goto even;
+  else
+      goto odd;
+even:
+  printf("%d is even", num);
+  return;
+odd:
+  printf("%d is odd", num);
+}
+```
+
+4 Every other identifier has scope determined by the placement of its declaration (in a declarator or type specifier). If the declarator or type specifier that declares the identifier appears outside of any block or list of parameters, the identifier has file scope, which terminates at the end of the translation unit. If the declarator or type specifier that declares the identifier appears inside a block or within the list of parameter declarations in a function definition, the identifier has block scope, which terminates at the end of the associated block. If the declarator or type specifier that declares the identifier appears within the list of parameter declarations in a function prototype (not part of a function definition), the identifier has function prototype scope, which terminates at the end of the function declarator. If an identifier designates two different entities in the same name space, the scopes might overlap. If so, the scope of one entity (the inner scope) will end strictly before the scope of the other entity (the outer scope). Within the inner scope, the identifier designates the entity declared in the inner scope; the entity declared in the outer scope is hidden (and not visible) within the inner scope.
+
+除非另外有說明，
+> 5 Unless explicitly stated otherwise, where this International Standard uses the term
+‘‘identifier’’ to refer to some entity (as opposed to the syntactic construct), it refers to the entity in the relevant name space whose declaration is visible at the point the identifier occurs.
+
+6 Two identifiers have the same scope if and only if their scopes terminate at the same
+point.
+
+7 Structure, union, and enumeration tags have scope that begins just after the appearance of
+the tag in a type specifier that declares the tag. Each enumeration constant has scope that
+begins just after the appearance of its defining enumerator in an enumerator list. Any
+other identifier has scope that begins just after the completion of its declarator.
+
+8 As a special case, a type name (which is not a declaration of an identifier) is considered to
+have a scope that begins just after the place within the type name where the omitted
+identifier would appear were it not omitted.
+
+Forward references: declarations (6.7), function calls (6.5.2.2), function definitions
+(6.9.1), identifiers (6.4.2), macro replacement (6.10.3), name spaces of identifiers (6.2.3),
+source file inclusion (6.10.2), statements (6.8).
