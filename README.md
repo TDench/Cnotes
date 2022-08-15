@@ -1,7 +1,8 @@
-# 機械仔的 C 筆記
+# Dench 的 C 筆記
 
 這邊寫下我的筆記跟想法  
-這邊的內容都是節錄至[jserv 的你所不知道的 C 語言](https://hackmd.io/@sysprog/c-programming?type=view)，請大家多多支持大jserv這種懸壺濟世的教學。
+有些內容的內容都是節錄至[jserv 的你所不知道的 C 語言](https://hackmd.io/@sysprog/c-programming?type=view)，
+跟一些書籍，跟一些網路上大神的文章，翻譯成中文
 
 ## 緣由
 
@@ -10,6 +11,10 @@
 知名螞蟻本的內容
 
 - [Preprocessor](preprocessor.md)
+
+## C 語言規格書
+
+- [ISO 9899:201x](C1X.md)
 
 ## C9X rationale
 
